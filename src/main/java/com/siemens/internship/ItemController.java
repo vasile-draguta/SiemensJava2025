@@ -4,9 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -23,31 +21,25 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createItem(@Valid @RequestBody Item item, BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(result.getAllErrors(), HttpStatus.BAD_REQUEST); // return the found errors
-        }
-        return new ResponseEntity<>(itemService.save(item), HttpStatus.CREATED); // return the created item if there are
-                                                                                 // no errors
+    public ResponseEntity<Item> createItem(@Valid @RequestBody Item item) {
+        return new ResponseEntity<>(itemService.save(item), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Item> getItemById(@PathVariable Long id) {
         return itemService.findById(id)
                 .map(item -> new ResponseEntity<>(item, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // return not found if the item is not found
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Item> updateItem(@PathVariable Long id, @RequestBody Item item) {
+    public ResponseEntity<Item> updateItem(@PathVariable Long id, @Valid @RequestBody Item item) {
         Optional<Item> existingItem = itemService.findById(id);
         if (existingItem.isPresent()) {
             item.setId(id);
-            return new ResponseEntity<>(itemService.save(item), HttpStatus.OK); // return the updated item if the item
-                                                                                // is
-                                                                                // found
+            return new ResponseEntity<>(itemService.save(item), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // return not found if the item is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -55,9 +47,9 @@ public class ItemController {
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         if (itemService.findById(id).isPresent()) {
             itemService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // return no content if the item is deleted
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // return not found if the item is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
