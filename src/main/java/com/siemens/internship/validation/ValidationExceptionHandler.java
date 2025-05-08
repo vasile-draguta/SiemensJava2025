@@ -46,6 +46,6 @@ public class ValidationExceptionHandler {
                                                 "error", "Internal Server Error",
                                                 "message", runtimeException.getMessage()));
 
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
+                return ResponseEntity.badRequest().body(errors);
         }
 }

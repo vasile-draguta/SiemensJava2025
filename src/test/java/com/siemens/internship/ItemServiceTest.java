@@ -4,8 +4,13 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -128,5 +133,47 @@ public class ItemServiceTest {
 
         assertEquals("Item cannot be null", exception.getMessage());
         verify(itemRepository, never()).save(any());
+    }
+
+    @Test
+    public void testProcessItemsAsync_Success() throws Exception {
+        when(itemRepository.findAllIds()).thenReturn(Arrays.asList(1L, 2L));
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(validTestItem));
+        when(itemRepository.findById(2L)).thenReturn(Optional.of(validTestItem));
+
+        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> {
+            Item item = invocation.getArgument(0);
+            item.setStatus("PROCESSED");
+            return item;
+        });
+
+        CompletableFuture<List<Item>> future = itemService.processItemsAsync();
+        List<Item> result = future.get(1000, TimeUnit.MILLISECONDS);
+
+        assertEquals(2, result.size());
+        assertEquals("PROCESSED", result.get(0).getStatus());
+        assertEquals("PROCESSED", result.get(1).getStatus());
+
+        verify(itemRepository).findAllIds();
+        verify(itemRepository).findById(1L);
+        verify(itemRepository).findById(2L);
+        verify(itemRepository, times(2)).save(any(Item.class));
+    }
+
+    @Test
+    public void testProcessItemsAsync_Exception() throws Exception {
+        when(itemRepository.findAllIds()).thenReturn(Collections.singletonList(1L));
+
+        when(itemRepository.findById(1L)).thenThrow(new RuntimeException("Test exception"));
+
+        CompletableFuture<List<Item>> future = itemService.processItemsAsync();
+
+        ExecutionException exception = assertThrows(ExecutionException.class, () -> future.get());
+        assertTrue(exception.getCause() instanceof CompletionException);
+
+        verify(itemRepository).findAllIds();
+        verify(itemRepository).findById(1L);
+        verify(itemRepository, never()).save(any(Item.class));
     }
 }
