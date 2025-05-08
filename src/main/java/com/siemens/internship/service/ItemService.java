@@ -1,5 +1,7 @@
-package com.siemens.internship;
+package com.siemens.internship.service;
 
+import com.siemens.internship.model.Item;
+import com.siemens.internship.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -33,14 +35,20 @@ public class ItemService {
     }
 
     public Optional<Item> findById(Long id) {
+        validateId(id);
         return itemRepository.findById(id);
     }
 
     public Item save(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Item cannot be null");
+        }
+
         return itemRepository.save(item);
     }
 
     public void deleteById(Long id) {
+        validateId(id);
         itemRepository.deleteById(id);
     }
 
@@ -110,5 +118,15 @@ public class ItemService {
                     System.err.println("Error processing items: " + exception.getMessage());
                     throw new CompletionException(exception);
                 });
+    }
+
+    private void validateId(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+
+        if (id <= 0) {
+            throw new IllegalArgumentException("Id cannot be negative or zero");
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.siemens.internship;
+package com.siemens.internship.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +36,6 @@ public class Item {
     private String status;
 
     @NotBlank(message = "Email is required")
-    @Email( regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email format")
+    @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email format")
     private String email;
 }
