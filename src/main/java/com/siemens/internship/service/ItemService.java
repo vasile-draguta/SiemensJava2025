@@ -30,15 +30,29 @@ public class ItemService {
         Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdown));
     }
 
+    /**
+     *
+     * @return all items from the database
+     */
     public List<Item> findAll() {
         return itemRepository.findAll();
     }
 
+    /**
+     *
+     * @param id - the id of the item to be found
+     * @return the item with the given id
+     */
     public Optional<Item> findById(Long id) {
         validateId(id);
         return itemRepository.findById(id);
     }
 
+    /**
+     *
+     * @param item - the item to be saved
+     * @return the saved item
+     */
     public Item save(Item item) {
         if (item == null) {
             throw new IllegalArgumentException("Item cannot be null");
@@ -47,6 +61,10 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
+    /**
+     *
+     * @param id - the id of the item to be deleted
+     */
     public void deleteById(Long id) {
         validateId(id);
         itemRepository.deleteById(id);
@@ -66,6 +84,11 @@ public class ItemService {
     // is used on a method that returns a List<Item> and the method is asynchronous
     // Now all threads are processed in parallel and the results are collected in a
     // list and returned
+    /**
+     *
+     * @return a list of all items from the database processed in parallel and
+     *         returned as a CompletableFuture
+     */
     @Async
     public CompletableFuture<List<Item>> processItemsAsync() {
         List<Long> itemIds = itemRepository.findAllIds();
@@ -120,6 +143,11 @@ public class ItemService {
                 });
     }
 
+    /**
+     *
+     * @param id - the id of the item to be validated
+     * @throws IllegalArgumentException if the id is null or negative or zero
+     */
     private void validateId(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");

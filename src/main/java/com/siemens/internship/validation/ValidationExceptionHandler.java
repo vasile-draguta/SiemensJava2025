@@ -12,11 +12,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class ValidationExceptionHandler {
 
+        /**
+         *
+         * @param methodArgumentNotValidException - the exception to be handled
+         * @return a response entity with the errors in a format of a list of maps
+         *         with the field and the message
+         */
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<List<Map<String, String>>> handleValidationExceptions(
-                        MethodArgumentNotValidException ex) {
+                        MethodArgumentNotValidException methodArgumentNotValidException) {
 
-                List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
+                List<Map<String, String>> errors = methodArgumentNotValidException
+                                .getBindingResult().getFieldErrors().stream()
                                 .map(error -> Map.of(
                                                 "field", error.getField(),
                                                 "message", error.getDefaultMessage()))
@@ -25,6 +32,12 @@ public class ValidationExceptionHandler {
                 return ResponseEntity.badRequest().body(errors);
         }
 
+        /**
+         *
+         * @param illegalArgumentException - the exception to be handled
+         * @return a response entity with the errors in a format of a list of maps
+         *         with the field and the message
+         */
         @ExceptionHandler(IllegalArgumentException.class)
         public ResponseEntity<List<Map<String, String>>> handleIllegalArgumentException(
                         IllegalArgumentException illegalArgumentException) {
@@ -37,6 +50,12 @@ public class ValidationExceptionHandler {
                 return ResponseEntity.badRequest().body(errors);
         }
 
+        /**
+         *
+         * @param runtimeException - the exception to be handled
+         * @return a response entity with the errors in a format of a list of maps
+         *         with the error and the message
+         */
         @ExceptionHandler(RuntimeException.class)
         public ResponseEntity<List<Map<String, String>>> handleRuntimeException(
                         RuntimeException runtimeException) {
